@@ -2,6 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:platform_convertor/app_const.dart';
+import 'package:platform_convertor/chats_screen.dart';
+import 'package:platform_convertor/switch_provider.dart';
+import 'package:platform_convertor/test/testone.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,18 +16,35 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isActive = false;
-  bool isProfile = false;
-  bool isTheme = false;
-  DateTime? date;
+
+
 
   TextEditingController _name = TextEditingController();
   TextEditingController _phonenumber = TextEditingController();
   TextEditingController _chat = TextEditingController();
 
+  void _addName() {
+    setState(() {
+      name.add(_name.text);
+      _name.clear();
+    });
+  }
+
+
+
+  void _navigateToNameListPage() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NameListPage(names: name),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final profilechange = Provider.of<SwitchProvider>(context,listen: false);
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -31,12 +52,14 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: AppBar(
           title: const Text("Platform Convertor"),
           actions: [
-            Switch(
-              value: isActive,
-              onChanged: (value) {
-                setState(() {
-                  isActive = value;
-                });
+            Consumer<SwitchProvider>(
+              builder: (context, value, child) {
+                return Switch(
+                  value: profilechange.isActive,
+                  onChanged: (value) {
+                    profilechange.setisActive();
+                  },
+                );
               },
             )
           ],
@@ -82,15 +105,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: size.width / 1.05,
                   child: TextField(
-                    onTap: () {},
-                    cursorColor: Colors.black54,
                     controller: _name,
+                    cursorColor: Colors.black54,
                     style: const TextStyle(fontWeight: FontWeight.w400),
                     decoration: InputDecoration(
                       alignLabelWithHint: true,
                       border: InputBorder.none,
                       prefixIcon: Icon(
-                        CupertinoIcons.person,
+                        Icons.phone,
                         color: Colors.black,
                       ),
                       labelText: "Name",
@@ -105,7 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderSide: const BorderSide(color: Colors.deepPurple),
                       ),
                       hintStyle:
-                          const TextStyle(fontSize: 16, color: Colors.black54),
+                      const TextStyle(fontSize: 16, color: Colors.black54),
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 20),
                     ),
@@ -117,10 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   width: size.width / 1.05,
                   child: TextField(
-                    onTap: () {},
-                    cursorColor: Colors.black54,
                     controller: _phonenumber,
-                    keyboardType: TextInputType.numberWithOptions(),
+                    cursorColor: Colors.black54,
                     style: const TextStyle(fontWeight: FontWeight.w400),
                     decoration: InputDecoration(
                       alignLabelWithHint: true,
@@ -141,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderSide: const BorderSide(color: Colors.deepPurple),
                       ),
                       hintStyle:
-                          const TextStyle(fontSize: 16, color: Colors.black54),
+                      const TextStyle(fontSize: 16, color: Colors.black54),
                       contentPadding: const EdgeInsets.symmetric(
                           vertical: 15.0, horizontal: 20),
                     ),
@@ -192,9 +212,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             lastDate: DateTime(2030));
 
                       print(pickedDate);
-                      setState(() {
-                        date = pickedDate!;
-                      });
+                      profilechange.setisDate();
 
                       },
                       icon: Icon(
@@ -220,43 +238,39 @@ class _HomeScreenState extends State<HomeScreen> {
                     time != null?Text("${time}") : Text("${TimeOfDay.now()}")
                   ],
                 ),
-                ElevatedButton(onPressed: () {
-                    setState(() async {
-                      if(_name.text.isNotEmpty && _phonenumber.text.isNotEmpty){
-                        SharedPreferences pref =
-                            await SharedPreferences.getInstance();
-                        pref.setString("Name", _name.text);
-                        name = pref.getString("Name")! as List<String>;
-                        pref.setString("PhoneNumber", _phonenumber.text);
-                        phonenumber = pref.getString("PhoneNumber")!;
-                      }
-                    });
-                }, child: Text("Save"))
+                // ElevatedButton(onPressed: () async {
+                //     setState(()  {});
+                //       // if(_name.text.isNotEmpty && _phonenumber.text.isNotEmpty){
+                //       //   SharedPreferences pref =
+                //       //       await SharedPreferences.getInstance();
+                //       //   pref.setString("Name", _name.text);
+                //       //   name = pref.getStringList("Name")!;
+                //       //   pref.setString("PhoneNumber", _phonenumber.text);
+                //       //   phonenumber = pref.getString("PhoneNumber")!;
+                //       //   print(name);
+                //       //   print(phonenumber);
+                //       // }
+                //   name.isEmpty ? null: _navigateToNameListPage();
+                //
+                // }, child: Text("Save")),
+                ElevatedButton(
+                  onPressed: _addName,
+                  child: Text('Add Name'),
+                ),
+                ElevatedButton(
+                  onPressed: name.isEmpty ? null : _navigateToNameListPage,
+                  child: Text('Go to Name List Page'),
+                ),
               ],
             ),
           ),
           // Center(child: const Text("No chats yet...")),
-          Container(
-            height: size.height,
-            width: size.width,
-            child: ListView(
-              children: [
-                Row(
-                  children: [
-                    Text("$name"),
-                    Text("$phonenumber"),
-                    Text("$date"),
-                  ],
-                )
-              ],
-            ),
-          ),
+          NameListPage(names: name),
           Center(child: const Text("No calls yet...")),
           Container(
             height: size.height,
             width: size.width,
             child: Column(
-
               children: [
                 SizedBox(height: size.height / 28),
                 Row(
@@ -291,12 +305,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(
                       width: size.width / 4,
                     ),
-                    Switch(
-                      value: isProfile,
-                      onChanged: (value) {
-                        setState(() {
-                          isProfile = value;
-                        });
+                    Consumer<SwitchProvider>(
+                      builder: (BuildContext context, value, Widget? child) {
+                        return Switch(
+                          value: profilechange.isProfile,
+                          onChanged: (value) {
+                           profilechange.setisProfile();
+                          },
+                        );
                       },
                     ),
                   ],
@@ -338,13 +354,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     SizedBox(
                       width: size.width / 3,
                     ),
-                    Switch(
-                      value: isTheme,
-                      onChanged: (value) {
-                        setState(() {
-                          isTheme = value;
-                        });
+                    Consumer<SwitchProvider>(
+                      builder: (context, value, child) {
+                        return Switch(
+                          value: profilechange.isTheme,
+                          onChanged: (value) {
+                            profilechange.setisTheme();
+                          },
+                        );
                       },
+
                     ),
                   ],
                 ),
