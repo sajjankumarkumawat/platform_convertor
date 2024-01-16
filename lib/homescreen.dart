@@ -212,8 +212,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             lastDate: DateTime(2030));
 
                       print(pickedDate);
-                      profilechange.setisDate();
-
+                      // profilechange.setisDate();
+                        setState(() {
+                          date = pickedDate;
+                        });
                       },
                       icon: Icon(
                         Icons.calendar_month,
@@ -265,7 +267,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           // Center(child: const Text("No chats yet...")),
-          NameListPage(names: name),
+          name.isEmpty ? Center(child: const Text("No chats yet...")) :  NameListPage(names: name),
           Center(child: const Text("No calls yet...")),
           Container(
             height: size.height,
@@ -316,6 +318,96 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ],
+                ),
+                Consumer<SwitchProvider>(
+                  builder: (BuildContext context, value, Widget? child) {
+                    return Visibility(visible: profilechange.isProfile,child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          height: size.height / 54,
+                        ),
+                        ClipOval(
+                          child: Container(
+                            height: size.height / 8,
+                            width: size.width / 3.8,
+                            color: Color(0xffE3D4F4),
+                            alignment: Alignment.center,
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 26,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: size.height / 54,
+                        ),
+                        TextField(
+                          controller: _name,
+                          cursorColor: Colors.black54,
+                          style: const TextStyle(fontWeight: FontWeight.w400),
+                          decoration: InputDecoration(
+                            alignLabelWithHint: true,
+                            border: InputBorder.none,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.transparent),
+                            ),
+                            hintText: 'Enter your name',
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.transparent),
+                            ),
+                            hintStyle:
+                            const TextStyle(fontSize: 16, color: Colors.black54),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 15.0, horizontal: 20),
+                          ),
+                        ),
+                        SizedBox(
+                          height: size.height / 78,
+                        ),
+                        TextField(
+                          controller: _phonenumber,
+                          cursorColor: Colors.black54,
+                          style: const TextStyle(fontWeight: FontWeight.w400),
+                          decoration: InputDecoration(
+                            alignLabelWithHint: true,
+                            border: InputBorder.none,
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.transparent),
+                            ),
+                            hintText: 'Enter your bio',
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.transparent),
+                            ),
+                            hintStyle:
+                            const TextStyle(fontSize: 16, color: Colors.black54),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 15.0, horizontal: 20),
+                          ),
+                        ),
+                        SizedBox(
+                          height: size.height / 54,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            TextButton(onPressed: () {
+
+                            }, child: Text("Save")),
+                            SizedBox(width: size.width/54,),
+                            TextButton(onPressed: () {
+
+                            }, child: Text("Clear"))
+                          ],
+                        )
+                      ],
+                    ) );
+                  },
                 ),
                 SizedBox(height: size.height / 64),
                 Divider(
